@@ -24,7 +24,7 @@ error Raffle__UpkeepNotNeeded(uint256 currentBalance, uint256 numPlayers, uint25
  *   @notice This contract is for creating an untamperable decentralized smart contract
  *   @dev This implements Chainlink VRF v2 and Chainlink Keepers
  */
-contract Rafffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
+contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     /** Type Declaration */
     enum RaffleState {
         OPEN,
@@ -103,7 +103,7 @@ contract Rafffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     function checkUpkeep(
         bytes memory /*checkData*/
     ) public override returns (bool upkeepNeeded, bytes memory /* performData */) {
-        bool isOpen = (RaffleState.OPEN == s_raffleState);
+        bool isOpen = RaffleState.OPEN == s_raffleState;
         // block.timestamp - last block timestamp > interval
         bool timePassed = ((block.timestamp - s_lastTimeStamp) > i_interval);
         bool hasPlayers = (s_players.length > 0);
@@ -189,5 +189,9 @@ contract Rafffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
 
     function getRequestConfirmations() public pure returns (uint256) {
         return REQUEST_CONFIRMATIONS;
+    }
+
+    function getInterval() public view returns (uint256) {
+        return i_interval;
     }
 }
