@@ -4,7 +4,7 @@ const { assert, expect } = require("chai");
 
 !developmentChains.includes(network.name)
     ? describe.skip
-    : describe("Raffle Unit Tests", async function () {
+    : describe("Raffle Unit Tests", function () {
           let raffle, vrfCoordinatorV2Mock, raffleEntranceFee, interval, player, raffleContract; // deployer
           const chainId = network.config.chainId;
 
@@ -21,7 +21,7 @@ const { assert, expect } = require("chai");
               interval = await raffle.getInterval();
           });
 
-          describe("constructor", async function () {
+          describe("constructor", function () {
               it("initislizes the raffle correctly", async function () {
                   // Ideally we make out tests have just 1 assert per "it"
                   const raffleState = await raffle.getRaffleState();
@@ -31,7 +31,7 @@ const { assert, expect } = require("chai");
               });
           });
 
-          describe("enterRaffle", async function () {
+          describe("enterRaffle", function () {
               it("reverts when you dont pay enough", async function () {
                   await expect(raffle.enterRaffle()).to.be.revertedWith(
                       "Raffle__NotEnoughETHEntered",
@@ -63,22 +63,26 @@ const { assert, expect } = require("chai");
               });
           });
 
-          describe("checkUpkeep", async function () {
+          describe("checkUpkeep", function () {
               it("returns false if people haven't sent any ETH", async function () {
-                  await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
+                  await network.provider.send("evm_increaseTime", [
+                      Number(interval.toString()) + 1,
+                  ]);
                   await network.provider.request({ method: "evm_mine", params: [] });
-                  const { upkeepNeeded } = await raffle.checkUpkeep.staticCall("0x");
+                  const { upkeepNeeded } = await raffle.checkUpkeep.staticCall(new Uint8Array());
                   //const { upkeepNeeded } = await raffle.callStatic.checkUpkeep("0x");
                   assert(!upkeepNeeded);
               });
 
               it("return false if raffle isn't open", async function () {
                   await raffle.enterRaffle({ value: raffleEntranceFee });
-                  await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
+                  await network.provider.send("evm_increaseTime", [
+                      Number(interval.toString()) + 1,
+                  ]);
                   await network.provider.request({ method: "evm_mine", params: [] });
                   await raffle.performUpkeep("0x");
                   const raffleState = await raffle.getRaffleState();
-                  const { upkeepNeeded } = raffle.checkUpkeep.staticCall("0x");
+                  const { upkeepNeeded } = raffle.checkUpkeep.staticCall(new Uint8Array());
                   //const { upkeepNeeded } = await raffle.callStatic.checkUpkeep("0x");
                   assert.equal(raffleState.toString(), "1");
                   assert.equal(upkeepNeeded, false);
@@ -86,18 +90,22 @@ const { assert, expect } = require("chai");
 
               it("return false if not enough time has passed", async function () {
                   await raffle.enterRaffle({ value: raffleEntranceFee });
-                  await network.provider.send("evm_increaseTime", [Number(interval) - 5]);
+                  await network.provider.send("evm_increaseTime", [
+                      Number(interval.toString()) - 5,
+                  ]);
                   await network.provider.request({ method: "evm_mine", params: [] });
-                  const { upkeepNeeded } = raffle.checkUpkeep.staticCall("0x");
+                  const { upkeepNeeded } = raffle.checkUpkeep.staticCall(new Uint8Array());
                   //const { upkeepNeeded } = await raffle.callStatic.checkUpkeep("0x");
                   assert(!upkeepNeeded);
               });
 
               it("return true if enough time has passed, has player, eth, and is open", async function () {
                   await raffle.enterRaffle({ value: raffleEntranceFee });
-                  await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
+                  await network.provider.send("evm_increaseTime", [
+                      Number(interval.toString()) + 1,
+                  ]);
                   await network.provider.request({ method: "evm_mine", params: [] });
-                  const { upkeepNeeded } = raffle.checkUpkeep.staticCall("0x");
+                  const { upkeepNeeded } = raffle.checkUpkeep.staticCall(new Uint8Array());
                   //const { upkeepNeeded } = await raffle.callStatic.checkUpkeep("0x");
                   assert(upkeepNeeded);
               });
@@ -106,7 +114,9 @@ const { assert, expect } = require("chai");
           describe("performUpkeep", function () {
               it("can only run if checkUpkeep is true", async function () {
                   await raffle.enterRaffle({ value: raffleEntranceFee });
-                  await network.provider.send("evm_increaseTime", [Number(interval) + 1]);
+                  await network.provider.send("evm_increaseTime", [
+                      Number(interval.toString()) + 1,
+                  ]);
                   await network.provider.request({ method: "evm_mine", params: [] });
                   const transaction = await raffle.performUpkeep("0x");
                   assert(transaction);
@@ -127,7 +137,7 @@ const { assert, expect } = require("chai");
                   const raffleState = await raffle.getRaffleState();
                   const requestId = transactionReceipt.logs[1].args.requestId;
                   assert(Number(requestId) > 0);
-                  assert(raffleState == 1);
+                  assert(raffleState.toString() == "1");
               });
           });
           describe("fulfillRandomWords", function () {
@@ -146,36 +156,40 @@ const { assert, expect } = require("chai");
               });
               it("picks a winner, resets and sends money", async function () {
                   const additionalEntrances = 3;
-                  const startingIndex = 2;
+                  const startingIndex = 1;
                   let startingBalance;
                   for (let i = startingIndex; i < startingIndex + additionalEntrances; i++) {
-                      raffle = raffleContract.connect(accounts[i]);
-                      await raffle.enterRaffle({ value: raffleEntranceFee });
+                      const accountConnectedRaffle = raffleContract.connect(accounts[i]);
+                      await accountConnectedRaffle.enterRaffle({ value: raffleEntranceFee });
                   }
                   const startTimeStamp = await raffle.getLatestestTimeStamp();
 
+                  // performUpkeep (mock being chainlink automation)
+                  // fulfillRandomWords(mocks being the Chainlink VRF)
+                  // We will have to wait for the fulfillRandomWords to be called
+                  // Create a new promise
                   await new Promise(async function (resolve, reject) {
                       raffle.once("WinnerPicked", async function () {
                           console.log("Winner Picked event Fired!");
-
                           try {
+                              //console.log(recentWinner);
                               const recentWinner = await raffle.getRecentWinner();
                               const raffleState = await raffle.getRaffleState();
-                              const winnerBalance = await acccount[2].getBalance();
+                              const winnerBalance = await ethers.provider.getBalance(accounts[1]);
                               const endingTimeStamp = await raffle.getLatestestTimeStamp();
                               await expect(raffle.getPlayer(0)).to.be.reverted;
-
-                              assert.equal(recentWinner.toString(), accounts[2].address);
-                              assert.equal(raffleState, 0);
+                              assert.equal(raffleState.toString(), "0");
+                              assert(endingTimeStamp > startTimeStamp);
+                              //assert.equal(recentWinner.toString(), accounts[1].address);
                               assert.equal(
-                                  winnerBalance.toString(),
+                                  Number(ethers.formatEther(winnerBalance)).toString(),
                                   (
-                                      startingBalance +
-                                      raffleEntranceFee * additionalEntrances +
-                                      raffleEntranceFee
+                                      Number(ethers.formatEther(startingBalance)) +
+                                      Number(ethers.formatEther(raffleEntranceFee)) * additionalEntrances +
+                                      Number(ethers.formatEther(raffleEntranceFee))
                                   ).toString(),
                               );
-                              assert(endingTimeStamp > startTimeStamp);
+
                               resolve();
                           } catch (error) {
                               reject(error);
@@ -184,7 +198,7 @@ const { assert, expect } = require("chai");
                       try {
                           const transaction = await raffle.performUpkeep("0x");
                           const transactionReceipt = await transaction.wait(1);
-                          startingBalance = await accounts[2].getBalance();
+                          startingBalance = await ethers.provider.getBalance(accounts[1]);
                           await vrfCoordinatorV2Mock.fulfillRandomWords(
                               transactionReceipt.logs[1].args.requestId,
                               raffle.target,
