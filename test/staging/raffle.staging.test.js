@@ -20,6 +20,8 @@ developmentChains.includes(network.name)
                   // enter the raffle
                   const startTimeStamp = await raffle.getLatestestTimeStamp();
                   console.log("Entering Raffle")
+                  console.log(`raffleEntranceFee: ${raffleEntranceFee}`)
+                  console.log(`raffle: ${raffle}`)
                   // Setup Listener before we enter the raffle
                   // Just in case the blockchain moves really fast
                   console.log("Setting up Listener...")
@@ -29,7 +31,7 @@ developmentChains.includes(network.name)
                           try {
                               const recentWinner = await raffle.getRecentWinner();
                               const raffleState = await raffle.getRaffleState();
-                              const winnerEndingBalance = await ethers.provider.getBalance(accounts[0]);
+                              const winnerEndingBalance = await accounts[0].getBalance();
                               const endingTimeStamp = await raffle.getLatestestTimeStamp();
                               await expect(raffle.getPlayer(0)).to.be.reverted;
                               assert.equal(recentWinner.toString, accounts[0].address);
@@ -45,8 +47,6 @@ developmentChains.includes(network.name)
                               reject(error);
                           }
                       });
-                  });
-
                   // Enter Raffle
                   //entering the raffle
                   console.log("Entering Raffle...")
@@ -59,6 +59,7 @@ developmentChains.includes(network.name)
                   //Code won't complete until listener is done
 
                   //Code wont complete until our listener has finished listening
+                  });
               });
           });
       });
