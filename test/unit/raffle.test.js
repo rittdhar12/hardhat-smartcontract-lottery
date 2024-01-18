@@ -11,9 +11,9 @@ const { assert, expect } = require("chai");
           beforeEach(async function () {
               accounts = await ethers.getSigners();
               player = accounts[1];
-              await deployments.fixture(["mocks", "raffle"]);
+              //await deployments.fixture(["mocks", "raffle"]);
               //deployer = (await getNamedAccounts()).deployer;
-              await deployments.fixture(["all"]);
+              //await deployments.fixture(["all"]);
               raffleContract = await ethers.getContract("Raffle");
               raffle = raffleContract.connect(player);
               vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
@@ -22,7 +22,7 @@ const { assert, expect } = require("chai");
           });
 
           describe("constructor", function () {
-              it("initislizes the raffle correctly", async function () {
+              it("initializes the raffle correctly", async function () {
                   // Ideally we make out tests have just 1 assert per "it"
                   const raffleState = await raffle.getRaffleState();
                   const interval = await raffle.getInterval();
@@ -82,7 +82,7 @@ const { assert, expect } = require("chai");
                   await network.provider.request({ method: "evm_mine", params: [] });
                   await raffle.performUpkeep("0x");
                   const raffleState = await raffle.getRaffleState();
-                  const { upkeepNeeded } = raffle.checkUpkeep.staticCall(new Uint8Array());
+                  const { upkeepNeeded } = await raffle.checkUpkeep.staticCall(new Uint8Array());
                   //const { upkeepNeeded } = await raffle.callStatic.checkUpkeep("0x");
                   assert.equal(raffleState.toString(), "1");
                   assert.equal(upkeepNeeded, false);
@@ -94,7 +94,7 @@ const { assert, expect } = require("chai");
                       Number(interval.toString()) - 5,
                   ]);
                   await network.provider.request({ method: "evm_mine", params: [] });
-                  const { upkeepNeeded } = raffle.checkUpkeep.staticCall(new Uint8Array());
+                  const { upkeepNeeded } = await raffle.checkUpkeep.staticCall(new Uint8Array());
                   //const { upkeepNeeded } = await raffle.callStatic.checkUpkeep("0x");
                   assert(!upkeepNeeded);
               });
@@ -105,7 +105,7 @@ const { assert, expect } = require("chai");
                       Number(interval.toString()) + 1,
                   ]);
                   await network.provider.request({ method: "evm_mine", params: [] });
-                  const { upkeepNeeded } = raffle.checkUpkeep.staticCall(new Uint8Array());
+                  const { upkeepNeeded } = await raffle.checkUpkeep.staticCall(new Uint8Array());
                   //const { upkeepNeeded } = await raffle.callStatic.checkUpkeep("0x");
                   assert(upkeepNeeded);
               });
