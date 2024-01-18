@@ -11,7 +11,7 @@ const { assert, expect } = require("chai");
           beforeEach(async function () {
               accounts = await ethers.getSigners();
               player = accounts[1];
-              //await deployments.fixture(["mocks", "raffle"]);
+              await deployments.fixture(["mocks", "raffle"]);
               //deployer = (await getNamedAccounts()).deployer;
               //await deployments.fixture(["all"]);
               raffleContract = await ethers.getContract("Raffle");
