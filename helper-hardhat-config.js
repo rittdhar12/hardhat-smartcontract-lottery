@@ -27,4 +27,13 @@ const developmentChains = ["hardhat", "localhost"];
 
 const VERIFICATION_BLOCK_CONFIRMATIONS = 6;
 
-module.exports = { networkConfig, developmentChains, VERIFICATION_BLOCK_CONFIRMATIONS };
+const FRONT_END_ADDRESSES_FILE = "../nextjs-smartcontract-lottery/constants/contractAddress.json";
+const FRONT_END_ABI_FILE = "../nextjs-smartcontract-lottery/constants/abi.json";
+
+module.exports = {
+    networkConfig,
+    developmentChains,
+    VERIFICATION_BLOCK_CONFIRMATIONS,
+    FRONT_END_ABI_FILE,
+    FRONT_END_ADDRESSES_FILE,
+};

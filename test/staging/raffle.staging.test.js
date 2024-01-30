@@ -8,10 +8,9 @@ developmentChains.includes(network.name)
           let raffle, raffleEntranceFee, deployer;
 
           beforeEach(async function () {
-              accounts = await ethers.getSigners();
               //player = accounts[1];
-              deployer = (await getNamedAccounts()).deployer
-              raffle = await ethers.getContract("Raffle", deployer)
+              deployer = (await getNamedAccounts()).deployer;
+              raffle = await ethers.getContract("Raffle", deployer);
               raffleEntranceFee = await raffle.getEntranceFee();
           });
 
@@ -19,14 +18,13 @@ developmentChains.includes(network.name)
               it("Works with live chainlink automation and VRF, get a random winner", async function () {
                   // enter the raffle
                   const startTimeStamp = await raffle.getLatestestTimeStamp();
-                  console.log("Entering Raffle")
-                  console.log(`raffleEntranceFee: ${raffleEntranceFee}`)
-                  console.log(`raffle: ${raffle}`)
+                  console.log("Setting up test");
+                  const accounts = await ethers.getSigners();
                   // Setup Listener before we enter the raffle
                   // Just in case the blockchain moves really fast
-                  console.log("Setting up Listener...")
+                  console.log("Setting up Listener...");
                   await new Promise(async (resolve, reject) => {
-                      raffle.once("WinnerPicked", async function () {
+                      raffle.once("WinnerPicked", async function() {
                           console.log("WinnerPicked event fired!");
                           try {
                               const recentWinner = await raffle.getRecentWinner();
@@ -37,28 +35,29 @@ developmentChains.includes(network.name)
                               assert.equal(recentWinner.toString, accounts[0].address);
                               assert.equal(raffleState.toString(), "0");
                               assert.equal(
-                                  (winnerEndingBalance).toString(),
+                                  winnerEndingBalance.toString(),
                                   (winnerStartingBalance + raffleEntranceFee).toString(),
                               );
                               assert(endingTimeStamp > startTimeStamp);
-                              resolve()
+                              resolve();
                           } catch (error) {
                               console.log(error);
                               reject(error);
                           }
                       });
-                  // Enter Raffle
-                  //entering the raffle
-                  console.log("Entering Raffle...")
-                  const tx = await raffle.enterRaffle({ value: raffleEntranceFee })
+                      // Enter Raffle
+                      //entering the raffle
+                      console.log("Entering Raffle...");
+                      const tx = await raffle.enterRaffle({ value: raffleEntranceFee });
 
-                  await tx.wait(1)
-                  console.log("Time to wait...")
-                  const winnerStartingBalance = await accounts[0].getBalance()
-                  console.log("Listening to new promise...")
-                  //Code won't complete until listener is done
+                      await tx.wait(1);
+                      console.log("Time to wait...");
+                      //const winnerStartingBalance = await accounts[0].getBalance()
+                      //console.log(`Winner Starting Balance: ${winnerStartingBalance}`)
+                      console.log("Listening to new promise...");
+                      //Code won't complete until listener is done
 
-                  //Code wont complete until our listener has finished listening
+                      //Code wont complete until our listener has finished listening
                   });
               });
           });

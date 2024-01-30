@@ -1,10 +1,7 @@
 // Enter the lottery (paying some amount)
-
 // Pick a random winner (verfifiably random)
-
 // Winner to be seelcted every X minutes -> completely automated
-
-// Chainlink Oracle -> Randomness, Automated Execution (Chainlink Keepers)
+// Chainlink Oracle -> Randomness, Automated Execution (Chainlink Keepers now Chainlink Automation)
 
 // SPDX-License-Identifier: MIT
 
@@ -47,7 +44,6 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     uint256 private s_lastTimeStamp;
     address payable[] private s_players; // Storage
 
-    // bool private s_isOpen; // to true, false
 
     /** Events */
     event RaffleEnter(address indexed player);
@@ -55,7 +51,6 @@ contract Raffle is VRFConsumerBaseV2, AutomationCompatibleInterface {
     event WinnerPicked(address indexed winner);
 
     // Constructor
-
     constructor(
         address vrfCoordinatorV2,
         uint256 entranceFee,
