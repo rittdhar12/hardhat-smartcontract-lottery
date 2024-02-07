@@ -20,7 +20,9 @@ async function updateAbi() {
 
 async function updateContractAddresses() {
     const raffle = await ethers.getContract("Raffle");
+    console.log(raffle)
     const chainId = network.config.chainId.toString();
+    console.log(chainId)
     const currentAddresses = JSON.parse(fs.readFileSync(FRONT_END_ADDRESSES_FILE, "utf-8"));
     if (chainId in currentAddresses) {
         if (!currentAddresses[chainId].includes(raffle.target)) {

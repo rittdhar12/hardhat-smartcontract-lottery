@@ -3,6 +3,7 @@ const networkConfig = {
     default: {
         name: "hardhat",
         keepersUpdateInterval: "30",
+        entranceFee: ethers.parseEther("0.01")
     },
     11155111: {
         name: "sepolia",
@@ -27,7 +28,7 @@ const developmentChains = ["hardhat", "localhost"];
 
 const VERIFICATION_BLOCK_CONFIRMATIONS = 6;
 
-const FRONT_END_ADDRESSES_FILE = "../nextjs-smartcontract-lottery/constants/contractAddress.json";
+const FRONT_END_ADDRESSES_FILE = "../nextjs-smartcontract-lottery/constants/contractAddresses.json";
 const FRONT_END_ABI_FILE = "../nextjs-smartcontract-lottery/constants/abi.json";
 
 module.exports = {
